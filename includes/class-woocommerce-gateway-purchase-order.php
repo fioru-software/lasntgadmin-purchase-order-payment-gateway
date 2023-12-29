@@ -140,33 +140,56 @@ final class Woocommerce_Gateway_Purchase_Order extends WC_Payment_Gateway {
 	 * @return array An array containing the result text and a redirect URL.
 	 */
 	public function process_payment( $order_id ) {
-		$order = new WC_Order( $order_id );
 
-		$poorder = $this->get_post( 'po_number_field' );
+		try {
+			$order = new WC_Order( $order_id );
+			$redirect_url = get_admin_url( null, "post.php?post=$order_id&action=edit&tab=payment" );
 
-		if ( isset( $poorder ) ) {
-			$order->update_meta_data( '_po_number', esc_attr( $poorder ) );
-			$order->set_transaction_id( esc_attr( $poorder ) );
-			$order->save();
+			$poorder = $this->get_post( 'po_number_field' );
+
+			/**    
+			 * The payment_complete() method will return false when an exception is thrown,    
+			 * which we do when there are not enough spaces or quota left.    
+			 *    
+			 * @see OrderUtils::can_order_be_placed()    
+			 */    
+			if ( ! $order->payment_complete() ) {    
+				$order->update_status( 'wc-waiting-list' );    
+				return [
+					'result' => 'error',
+					'redirect' => $redirect_url
+				];
+			} else {
+				if ( isset( $poorder ) ) {
+					$order->update_meta_data( '_po_number', esc_attr( $poorder ) );
+					$order->set_transaction_id( esc_attr( $poorder ) );
+					$order->save();
+				}
+				$order->update_status( 'completed' );
+
+				// Reduce stock levels
+				if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
+					$order->reduce_order_stock();
+				} else {
+					wc_reduce_stock_levels( $order->get_id() );
+				}
+
+				// Remove cart
+				WC()->cart->empty_cart();
+
+				// Return thankyou redirect
+				return array(
+					'result' 	=> 'success',
+					'redirect' => $redirect_url
+				);
+			}
+		} catch ( Exception $e ) {
+			wc_add_notice( $e->getMessage(), 'error' );
+			return [
+				'result' => 'error',
+				'redirect' => $redirect_url
+			];
 		}
-
-		$order->update_status( 'on-hold', __( 'Waiting to be processed', 'woocommerce-gateway-purchase-order' ) );
-
-		// Reduce stock levels
-		if ( version_compare( WC_VERSION, '3.0', '<' ) ) {
-			$order->reduce_order_stock();
-		} else {
-			wc_reduce_stock_levels( $order->get_id() );
-		}
-
-		// Remove cart
-		WC()->cart->empty_cart();
-
-		// Return thankyou redirect
-		return array(
-		'result' 	=> 'success',
-		'redirect'	=> $this->get_return_url( $order )
-		);
 	}
 
 	/**
