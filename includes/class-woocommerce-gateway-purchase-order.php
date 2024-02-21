@@ -143,7 +143,6 @@ final class Woocommerce_Gateway_Purchase_Order extends WC_Payment_Gateway {
 
 		try {
 			$order = new WC_Order( $order_id );
-			$redirect_url = get_admin_url( null, "post.php?post=$order_id&action=edit&tab=payment" );
 
 			$poorder = $this->get_post( 'po_number_field' );
 
@@ -157,7 +156,7 @@ final class Woocommerce_Gateway_Purchase_Order extends WC_Payment_Gateway {
 				$order->update_status( 'wc-waiting-list' );    
 				return [
 					'result' => 'error',
-					'redirect' => $redirect_url
+					'redirect' => get_admin_url( null, "post.php?post=$order_id&action=edit&tab=payment" )
 				];
 			} else {
 				if ( isset( $poorder ) ) {
@@ -180,14 +179,14 @@ final class Woocommerce_Gateway_Purchase_Order extends WC_Payment_Gateway {
 				// Return thankyou redirect
 				return array(
 					'result' 	=> 'success',
-					'redirect' => $redirect_url
+					'redirect' => get_admin_url( null, "edit.php?post_type=shop_order" )
 				);
 			}
 		} catch ( Exception $e ) {
 			wc_add_notice( $e->getMessage(), 'error' );
 			return [
 				'result' => 'error',
-				'redirect' => $redirect_url
+				'redirect' => get_admin_url( null, "post.php?post=$order_id&action=edit&tab=payment" )
 			];
 		}
 	}
