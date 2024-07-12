@@ -17,7 +17,7 @@ final class Woocommerce_Gateway_Purchase_Order extends WC_Payment_Gateway {
 	 * @access  public
 	 * @since   1.0.0
 	 */
-	public $token;
+	public readonly string $token;
 
 	/**
 	 * The version number.
@@ -25,7 +25,11 @@ final class Woocommerce_Gateway_Purchase_Order extends WC_Payment_Gateway {
 	 * @access  public
 	 * @since   1.0.0
 	 */
-	public $version;
+	public readonly string $version;
+
+	public readonly string $plugin_url;
+	public readonly string $plugin_path;
+	public readonly string $instructions;
 
 	/**
 	 * Constructor function.

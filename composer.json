@@ -1,6 +1,6 @@
 {
     "name": "fioru/lasntgadmin-purchase-order-payment-gateway",
-    "version": "1.2.14",
+    "version": "1.2.15",
     "type": "wordpress-plugin",
     "extra": {
         "installer-name": "woocommerce-gateway-purchase-order"
