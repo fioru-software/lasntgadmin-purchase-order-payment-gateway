@@ -130,7 +130,8 @@ final class Woocommerce_Gateway_Purchase_Order extends WC_Payment_Gateway {
 ?>
 		<fieldset>
 			<p class="form-row form-row-first">
-				<label for="poorder"><?php _e( 'Purchase Order', 'woocommerce-gateway-purchase-order' ); ?> <span class="required">*</span></label>
+				<!--<label for="poorder"><?php _e( 'Purchase Order', 'woocommerce-gateway-purchase-order' ); ?> <span class="required">*</span></label>-->
+				<label for="poorder"><?php _e( 'Purchase Order', 'woocommerce-gateway-purchase-order' ); ?></label>
 				<input type="text" class="input-text" value="<?php echo esc_attr( $po_number ); ?>" id="po_number_field" name="po_number_field" />
 			</p>
 		</fieldset>
@@ -165,9 +166,9 @@ final class Woocommerce_Gateway_Purchase_Order extends WC_Payment_Gateway {
 			} else {
 				if ( isset( $poorder ) ) {
 					$order->update_meta_data( '_po_number', esc_attr( $poorder ) );
-					$order->set_transaction_id( esc_attr( $poorder ) );
-					$order->save();
 				}
+				$order->set_transaction_id( esc_attr( $poorder ) );
+				$order->save();
 				$order->update_status( 'completed' );
 
 				// Reduce stock levels
@@ -220,18 +221,17 @@ final class Woocommerce_Gateway_Purchase_Order extends WC_Payment_Gateway {
 	}
 
 	public function validate_fields () {
+		return true;
 		$poorder = $this->get_post( 'po_number_field' );
 		if( ! $poorder ) {
 			if ( function_exists ( 'wc_add_notice' ) ) {
 				// Replace deprecated $woocommerce_add_error() function.
-				wc_add_notice ( __ ( 'Please enter your PO Number.', 'woocommerce-gateway-purchase-order' ), 'error' );
+				wc_add_notice ( __ ( 'Please remember to enter your PO Number.', 'woocommerce-gateway-purchase-order' ), 'error' );
 			} else {
-				WC()->add_error( __( 'Please enter your PO Number.', 'woocommerce-gateway-purchase-order' ) );
+				WC()->add_error( __( 'Please remember to enter your PO Number.', 'woocommerce-gateway-purchase-order' ) );
 			}
-			return false;
-		} else {
-			return true;
 		}
+		return true;
 	}
 
 	/**
