@@ -14,18 +14,18 @@ class PurchaseOrderApi {
 	protected function __construct() {
 		register_rest_route(
 			self::PATH_PREFIX,
-			'/statuses',
+			'/update',
 			[
 				'methods' => 'POST',
 				'callback' => [ self::class, 'post_update_purchase_order' ],
-				'permission_callback' => [ self::class, 'auth_nonce' ],
+				'permission_callback' => '__return_true'
 			]
 		);
-	};
+	}
 
-	public static function get_instance(): OrderApi {
+	public static function get_instance(): PurchaseOrderApi {
 		if ( null === self::$instance ) {
-			self::$instance = new OrderApi();
+			self::$instance = new PurchaseOrderApi();
 		}
 		return self::$instance;
 	}
@@ -35,25 +35,25 @@ class PurchaseOrderApi {
 	}
 
 	/**
-	 * @return bool|WP_Error
-	 */
-	public static function auth_nonce( WP_REST_Request $req ) {
-		$nonce = $req->get_param( PurchaseOrderUtils::get_nonce_field_name() );
-		die("nonce: $nonce");
-		if ( ! wp_verify_nonce( $req->get_header( 'X-WP-Nonce' ), 'wp_rest' ) ) {
-			return new WP_Error( 'invalid_nonce', 'Invalid nonce', array( 'status' => 403 ) );
-		}
-		return true;
-	}
-
-	/**
 	 * @return int[]|WP_Error
 	 */
 	public static function post_update_purchase_order( WP_REST_Request $req ) {
-		$po_number = $res->get_param('po_number_field');
+		$po_number = $req->get_param('po_number_field');
+		$order_id = $req->get_param('order_id');
 		if( empty( $po_number ) ) {
-			return new WP_Error( 'missing_po_number', 'Missing purchase order identifier', array( 'status', => 400 ) );
+			return new WP_Error( 'missing_po_number', 'Missing purchase order identifier', array( 'status' => 400 ) );
 		}
+		if( empty($order_id ) ) {
+			return new WP_Error( 'missing_order_id', 'Missing order id', array( 'status' => 400 ) );
+		}
+		$order = wc_get_order( $order_id );
+		$order->update_meta_data('_po_number', $po_number);
+		$order->save();
+		return (object)[
+			'http_referer' => $req->get_param('_wp_http_referer'),
+			'order_id' => $order_id,
+			'po_number' => $po_number
+		];
 	}
 
 }

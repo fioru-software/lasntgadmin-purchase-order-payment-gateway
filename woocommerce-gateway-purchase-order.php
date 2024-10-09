@@ -20,6 +20,10 @@
  * @package woocommerce-gateway-purchase-order
  */
 
+use Lasntg\Admin\PaymentGateway\PurchaseOrder\PurchaseOrderApi;
+
+add_action( 'rest_api_init', [ PurchaseOrderApi::class, 'get_instance' ] );
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
