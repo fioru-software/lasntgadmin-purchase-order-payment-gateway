@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Purchase Order Payment Gateway
  * Plugin URI: https://woocommerce.com/products/woocommerce-gateway-purchase-order/
  * Description: Receive payments via purchase order with Woocommerce.
- * Version: 1.2.15
+ * Version: 1.2.16
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
  * Requires at least: 4.1.0
@@ -19,6 +19,10 @@
  *
  * @package woocommerce-gateway-purchase-order
  */
+
+use Lasntg\Admin\PaymentGateway\PurchaseOrder\PurchaseOrderApi;
+
+add_action( 'rest_api_init', [ PurchaseOrderApi::class, 'get_instance' ] );
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
