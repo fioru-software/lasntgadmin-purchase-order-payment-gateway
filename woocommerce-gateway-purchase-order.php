@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Purchase Order Payment Gateway
  * Plugin URI: https://woocommerce.com/products/woocommerce-gateway-purchase-order/
  * Description: Receive payments via purchase order with Woocommerce.
- * Version: 1.2.16
+ * Version: 1.2.17
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
  * Requires at least: 4.1.0
@@ -29,13 +29,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+function woocommerce_gateway_purchase_order_init() {
+	// Localisation.
+	load_plugin_textdomain( 'woocommerce-gateway-purchase-order', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+add_action( 'init', 'woocommerce_gateway_purchase_order_init' );
+
 /**
  * Initialise the payment gateway.
  *
  * @since  1.0.0
  * @return void
  */
-function woocommerce_gateway_purchase_order_init() {
+function woocommerce_gateway_purchase_order_plugins_loaded() {
 	// If we don't have access to the WC_Payment_Gateway class, get out.
 	if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 		return;
@@ -43,16 +49,13 @@ function woocommerce_gateway_purchase_order_init() {
 
 	add_filter( 'woocommerce_payment_gateways', 'woocommerce_gateway_purchase_order_register_gateway' );
 
-	// Localisation.
-	load_plugin_textdomain( 'woocommerce-gateway-purchase-order', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-
 	require_once __DIR__ . '/includes/class-woocommerce-gateway-purchase-order-privacy.php';
 
 	// Additional admin screen logic.
 	require_once __DIR__ . '/includes/class-woocommerce-gateway-purchase-order-admin.php';
 	Woocommerce_Gateway_Purchase_Order_Admin();
 }
-add_action( 'plugins_loaded', 'woocommerce_gateway_purchase_order_init' );
+add_action( 'plugins_loaded', 'woocommerce_gateway_purchase_order_plugins_loaded' );
 
 /**
  * Register this payment gateway within WooCommerce.
